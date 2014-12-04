@@ -29,6 +29,10 @@ if (!defined("WPINC")) {
 }
 
 require_once(plugin_dir_path(__FILE__) . "AjencyWpCore.php");
+require_once(plugin_dir_path(__FILE__) . "plugin.updater.class.php" );
+if ( is_admin() ) {
+   new GithubWpPluginUpdater( __FILE__, 'ajency', "ajency-wp-core" );
+}
 
 // Register hooks that are fired when the plugin is activated, deactivated, and uninstalled, respectively.
 register_activation_hook(__FILE__, array("AjencyWpCore", "activate"));
