@@ -12,23 +12,32 @@ DB_HOST=${4-localhost}
 WP_VERSION=${5-latest}
 
 WP_TESTS_DIR=${WP_TESTS_DIR-/tmp/wordpress-tests-lib}
-WP_CORE_DIR=/tmp/wordpress/
+WP_CORE_DIR=${WP_TESTS_DIR}/tmp/wordpress/
 
 set -ex
 
 install_wp() {
 	mkdir -p $WP_CORE_DIR
 
-	if [ $WP_VERSION == 'latest' ]; then 
+	if [ $WP_VERSION == 'latest' ]; then
 		local ARCHIVE_NAME='latest'
 	else
 		local ARCHIVE_NAME="wordpress-$WP_VERSION"
 	fi
 
-	wget -nv -O /tmp/wordpress.tar.gz http://wordpress.org/${ARCHIVE_NAME}.tar.gz
-	tar --strip-components=1 -zxmf /tmp/wordpress.tar.gz -C $WP_CORE_DIR
+	wget -nv -O ${WP_TESTS_DIR}/tmp/wordpress.tar.gz http://wordpress.org/${ARCHIVE_NAME}.tar.gz
+	tar --strip-components=1 -zxmf ${WP_TESTS_DIR}/tmp/wordpress.tar.gz -C $WP_CORE_DIR
 
 	wget -nv -O $WP_CORE_DIR/wp-content/db.php https://raw.github.com/markoheijnen/wp-mysqli/master/db.php
+}
+
+install_helper_plugin() {
+
+	local PLUGIN_VERSION='json-rest-api.1.1.1'
+
+	wget -nv -O $WP_CORE_DIR/wp-content/plugins/json-rest-api.zip https://downloads.wordpress.org/plugin/${PLUGIN_VERSION}.zip
+
+	unzip $WP_CORE_DIR/wp-content/plugins/json-rest-api.zip -d $WP_CORE_DIR/wp-content/plugins
 }
 
 install_test_suite() {
@@ -74,5 +83,6 @@ install_db() {
 }
 
 install_wp
+install_helper_plugin
 install_test_suite
 install_db

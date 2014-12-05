@@ -34,6 +34,13 @@ if ( is_admin() ) {
    new GithubWpPluginUpdater( __FILE__, 'ajency', "ajency-wp-core" );
 }
 
+//add plugin files
+require_once(plugin_dir_path(__FILE__) . "classes/user/class.usermodel.php");
+require_once(plugin_dir_path(__FILE__) . "classes/user/user.functions.php");
+
+//add api files
+require_once(plugin_dir_path(__FILE__ ). "api/class.user.authenticate.php");
+
 // Register hooks that are fired when the plugin is activated, deactivated, and uninstalled, respectively.
 register_activation_hook(__FILE__, array("AjencyWpCore", "activate"));
 register_deactivation_hook(__FILE__, array("AjencyWpCore", "deactivate"));
