@@ -37,8 +37,7 @@ function aj_get_user_model($user_id = 0){
 
 	$user_model->profile_picture = aj_get_user_profile_picture($user_id);
 
-	$user_model->ID = (int) $user_model->ID;
-	$user_model->status = (int) $user_model->status;
+	$user_model->ID = (int) $user_data->ID;
 
 	return apply_filters( 'aj_user_model', $user_model );
 }

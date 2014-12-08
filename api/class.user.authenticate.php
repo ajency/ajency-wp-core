@@ -18,15 +18,21 @@ class AjUserAuthenicationApi{
 		$this->server = $server;
 	}
 
-	public function register_routes( $routes ) {
-		$media_routes = array(
+	public function register_routes( $routes = array()) {
+		$auth_routes = array(
 			'/authenticate' => array(
 				array( array( $this, 'authenticate' ), WP_JSON_Server::CREATABLE ),
 			)
 		);
-		return array_merge( $routes, $media_routes );
+		return array_merge( $routes, $auth_routes );
 	}
 
+	/**
+	 * Authenticates the user based on passed user_login and password
+	 * @param  [String] $user_login User login
+	 * @param  [String] $user_pass  User password
+	 * @return WP_JSON_ResponseInterface the ajax response
+	 */
 	public function authenticate($user_login, $user_pass){
 		$auth_response = wp_authenticate( $user_login, $user_pass );
 		if( is_wp_error( $auth_response )){
@@ -34,10 +40,20 @@ class AjUserAuthenicationApi{
 			return $auth_response;
 		}
 
-		$user_data = aj_get_user_model($auth_response->ID);
+		$response = aj_get_user_model($auth_response->ID);
 
-		return $user_data;
+		if ( ! ( $response instanceof WP_JSON_ResponseInterface ) ) {
+			$response = new WP_JSON_Response( $response );
+		}
+
+		$data = $response->get_data();
+
+		$response->header( 'Location', json_url( '/users/' . $data->ID ));
+		$response->set_status( 201 );
+
+		return $response;
 	}
+
 
 }
 
