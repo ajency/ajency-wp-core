@@ -48,14 +48,28 @@ function aj_get_user_model($user_id = 0){
  * @return [type]           [description]
  */
 function aj_get_user_profile_picture($user_id = 0){
-	$profile_picture_id = get_user_meta($user_id,' profile_picture_id', true);
-	if((int)$profile_picture_id === 0)
-		return array();
 
-	$image = wp_get_attachment_metadata( $profile_picture_id );
+	$profile_picture_id = get_user_meta($user_id,'profile_picture_id', true);
+	if((int)$profile_picture_id === 0){
+		$mock_image = array(
+				'id' => 0,
+				'sizes' => array(
+					"thumbnail" => array(
+			                "height" => 150,
+			                "width" => 150,
+			                "url" => "http://placehold.it/200x200",
+			                "orientation" => "landscape"
+			            )
+			         )
+				);
+		return apply_filters('aj_mock_user_profile_picture', $mock_image ,$user_id );
+	}
 
-	return array(
-			'id' => $profile_picture_id,
-			'sizes' => $image->sizes
-	);
+	$image = wp_prepare_attachment_for_js( $profile_picture_id );
+
+	$profile_picture = array(
+							'id' => $profile_picture_id,
+							'sizes' => $image['sizes']
+						);
+	return apply_filters('aj_user_profile_picture', $profile_picture ,$user_id );
 }
