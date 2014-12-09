@@ -22,6 +22,9 @@ class AjUserAuthenicationApi{
 		$auth_routes = array(
 			'/authenticate' => array(
 				array( array( $this, 'authenticate' ), WP_JSON_Server::CREATABLE ),
+			),
+			'/userprofile' => array(
+				array( array( $this, 'user_profile' ), WP_JSON_Server::EDITABLE | WP_JSON_Server::ACCEPT_JSON ),
 			)
 		);
 		return array_merge( $routes, $auth_routes );
@@ -54,6 +57,26 @@ class AjUserAuthenicationApi{
 		return $response;
 	}
 
+	/**
+	 * [user_profile description]
+	 * @param  [type] $data [description]
+	 * @return [type]       [description]
+	 */
+	public function user_profile($data){
+
+		$response = aj_update_user_model($data);
+
+		if( is_wp_error( $response )){
+			$response->add_data(array( 'status' => 302 ));
+			return $response;
+		}
+
+		if ( ! ( $response instanceof WP_JSON_ResponseInterface ) ) {
+			$response = new WP_JSON_Response( $response );
+		}
+		$response->set_status( 200 );
+		return $response;
+	}
 
 }
 

@@ -73,3 +73,40 @@ function aj_get_user_profile_picture($user_id = 0){
 						);
 	return apply_filters('aj_user_profile_picture', $profile_picture ,$user_id );
 }
+
+/**
+ * [aj_update_user_model description]
+ * @param  [type] $data [description]
+ * @return [type]       [description]
+ */
+function aj_update_user_model($data){
+
+	if(!isset($data['ID']))
+		return new WP_Error('user_id_missing', __('User Id not passed'), array('status' => 302));
+
+	$user_id = $data['ID'];
+
+	$defaults = array(
+					'display_name' => '',
+					'profile_picture' => array( 'id' => 0 ),
+					'user_email' => ''
+				);
+
+	$args = wp_parse_args( $data, $defaults );
+	extract($args);
+
+	wp_update_user(array('ID' => $user_id,'display_name' => $display_name));
+
+	//update profile picture
+	$profile_picture_id = $profile_picture['id'];
+	update_user_meta( $user_id, 'profile_picture_id', $profile_picture_id );
+
+	/**
+	 * Ability for theme dev to add aditinal functionality after user model save
+	 */
+	do_action('aj_update_user_model', $data);
+
+	$user_model = aj_get_user_model($user_id);
+
+	return $user_model;
+}
