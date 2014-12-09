@@ -25,6 +25,10 @@ function get_wp_json_rest_api_vars(){
 function aj_get_user_model($user_id = 0){
 	$user_model = array();
 
+	if($user_id === 0){
+		return $user_model;
+	}
+
 	$user_data = get_userdata( $user_id );
 
 	$user_model = $user_data->data;
