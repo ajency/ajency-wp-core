@@ -18,6 +18,24 @@ function get_wp_json_rest_api_vars(){
 }
 
 /**
+ * Returns the API key for the user
+ * @param  [type] $user_id [description]
+ * @return [type]          [description]
+ */
+function aj_get_user_api_key($user_id){
+	return get_user_meta( $user_id, 'json_api_key' , true);
+}
+
+/**
+ * Returns the shared secret for the user
+ * @param  [type] $user_id [description]
+ * @return [type]          [description]
+ */
+function aj_get_user_shared_secret($user_id){
+	return get_user_meta( $user_id, 'json_shared_secret' , true);
+}
+
+/**
  * Function to get the user model
  * @param  integer $user_id [description]
  * @return [type]           [description]

@@ -45,11 +45,15 @@ class AjUserAuthenicationApi{
 
 		$response = aj_get_user_model($auth_response->ID);
 
+
 		if ( ! ( $response instanceof WP_JSON_ResponseInterface ) ) {
 			$response = new WP_JSON_Response( $response );
 		}
 
 		$data = $response->get_data();
+
+		$response->header( 'HTTP_X_API_KEY', aj_get_user_api_key($data->ID));
+		$response->header( 'HTTP_X_SHARED_SECRET', aj_get_user_shared_secret($data->ID));
 
 		$response->header( 'Location', json_url( '/users/' . $data->ID ));
 		$response->set_status( 201 );
