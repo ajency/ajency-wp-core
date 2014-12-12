@@ -25,9 +25,38 @@ class AjUserAuthenicationApi{
 			),
 			'/userprofile' => array(
 				array( array( $this, 'user_profile' ), WP_JSON_Server::EDITABLE | WP_JSON_Server::ACCEPT_JSON ),
+			),
+			// TODO : change the location of this code
+			'/attachments' => array(
+				array( array( $this, 'upload_attachment' ), WP_JSON_Server::CREATABLE ),
 			)
 		);
 		return array_merge( $routes, $auth_routes );
+	}
+
+	/**
+	 * [attachment_upload description]
+	 * @return [type] [description]
+	 */
+	public function upload_attachment(){
+		if ( ! current_user_can( 'upload_files' ) )
+			return new WP_Error('no_permission', __('You dont have enough permission'),
+				 array('status' => 200 ));
+
+		$attachment_id = media_handle_upload( 'async-upload', null, array() );
+
+		if ( is_wp_error( $attachment_id ) ) {
+			return $attachment_id;
+		}
+
+		$attachment = wp_prepare_attachment_for_js( $attachment_id );
+
+		if ( ! ( $attachment instanceof WP_JSON_ResponseInterface ) ) {
+			$response = new WP_JSON_Response( $attachment );
+		}
+		$response->set_status( 201 );
+
+		return $response;
 	}
 
 	/**
