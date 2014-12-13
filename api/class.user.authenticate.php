@@ -65,8 +65,17 @@ class AjUserAuthenicationApi{
 	 * @param  [String] $user_pass  User password
 	 * @return WP_JSON_ResponseInterface the ajax response
 	 */
-	public function authenticate($user_login, $user_pass){
-		$auth_response = wp_authenticate( $user_login, $user_pass );
+	public function authenticate($user_login, $user_pass, $type = 'basic', $userData = array()){
+
+		if($type === 'basic'){
+			$auth_response = wp_authenticate( $user_login, $user_pass );
+		}
+		else if($type === 'facebook'){
+			$access_token = $user_pass;
+			$user_email = $user_login;
+			$auth_response = $this->authenticate_with_facebook( $user_login, $access_token, $userData );
+		}
+
 		if( is_wp_error( $auth_response )){
 			$auth_response->add_data(array( 'status' => 200 ));
 			return $auth_response;
@@ -88,6 +97,58 @@ class AjUserAuthenicationApi{
 		$response->set_status( 201 );
 
 		return $response;
+	}
+
+	public function authenticate_with_facebook($user_login, $access_token, $user_data){
+
+		$user = false;
+		$user_id = $this->findUserIdByFBID($user_data['id']);
+		if($user_id === false){
+			$user_id =	$this->create_user_by_fb($user_data);
+		}
+		$user = get_userdata( $user_id );
+
+		return $user;
+
+	}
+
+	public function create_user_by_fb($userdata){
+		//register the user if not exist
+		$user_id = false;
+        if ( email_exists($userdata['email']) == false ) {
+            $random_password = wp_generate_password( 12, false );
+            $user_id = wp_create_user( "FB_".$userdata['id'], $random_password, $userdata['email'] );
+	        //set user data
+	        $userprofiledata = array(
+					            'ID' => $user_id,
+					            'first_name' => $userdata['first_name'],
+					            'last_name' => $userdata['last_name'],
+					            'display_name' => $userdata['name']
+	            			);
+
+	        wp_update_user( $userprofiledata );
+	        update_user_meta( $user_id, 'facebook_uid', $userdata['id'] );
+	    }
+	    return $user_id;
+	}
+
+	public function findUserIdByFBID( $fb_id ) {
+		$user_args = array(
+			'meta_query' => array(
+				array(
+					'key' => 'facebook_uid',
+					'value' => $fb_id,
+				),
+			),
+			'number' => 1,
+			'fields' => array( 'ID' ),
+		);
+		$user = get_users( $user_args );
+		if ( is_array( $user ) && !empty( $user ) ) {
+			return $user[0]->ID;
+		}
+
+		return false;
 	}
 
 	/**
