@@ -103,31 +103,37 @@ class AjUserAuthenicationApi{
 
 		$user = false;
 		$user_id = $this->findUserIdByFBID($user_data['id']);
+
 		if($user_id === false){
 			$user_id =	$this->create_user_by_fb($user_data);
 		}
+
+		if($user_id === false)
+			return new WP_Error('user_not_created', __('User not created'));
+
 		$user = get_userdata( $user_id );
 
 		return $user;
 
 	}
 
-	public function create_user_by_fb($userdata){
+	public function create_user_by_fb($user_data){
 		//register the user if not exist
+
 		$user_id = false;
-        if ( email_exists($userdata['email']) == false ) {
+        if ( email_exists($user_data['email']) == false ) {
             $random_password = wp_generate_password( 12, false );
-            $user_id = wp_create_user( "FB_".$userdata['id'], $random_password, $userdata['email'] );
-	        //set user data
+            $user_id = wp_create_user( "FB_".$user_data['id'], $random_password, $user_data['email'] );
+            //set user data
 	        $userprofiledata = array(
 					            'ID' => $user_id,
-					            'first_name' => $userdata['first_name'],
-					            'last_name' => $userdata['last_name'],
-					            'display_name' => $userdata['name']
+					            'first_name' => $user_data['first_name'],
+					            'last_name' => $user_data['last_name'],
+					            'display_name' => $user_data['name']
 	            			);
 
 	        wp_update_user( $userprofiledata );
-	        update_user_meta( $user_id, 'facebook_uid', $userdata['id'] );
+	        update_user_meta( $user_id, 'facebook_uid', $user_data['id'] );
 	    }
 	    return $user_id;
 	}
@@ -144,6 +150,7 @@ class AjUserAuthenicationApi{
 			'fields' => array( 'ID' ),
 		);
 		$user = get_users( $user_args );
+
 		if ( is_array( $user ) && !empty( $user ) ) {
 			return $user[0]->ID;
 		}

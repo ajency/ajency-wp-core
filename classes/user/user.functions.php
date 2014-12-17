@@ -86,13 +86,20 @@ function aj_get_user_profile_picture($user_id = 0){
 				);
 		return apply_filters('aj_mock_user_profile_picture', $mock_image ,$user_id );
 	}
+	else{
 
-	$image = wp_prepare_attachment_for_js( $profile_picture_id );
+		if(get_user_meta( $user_id, 'facebook_uid', true ) !== ''){
 
-	$profile_picture = array(
-							'id' => $profile_picture_id,
-							'sizes' => $image['sizes']
-						);
+		}
+
+		$image = wp_prepare_attachment_for_js( $profile_picture_id );
+		$profile_picture = array(
+						'id' => $profile_picture_id,
+						'sizes' => $image['sizes']
+					);
+
+	}
+
 	return apply_filters('aj_user_profile_picture', $profile_picture ,$user_id );
 }
 
@@ -132,3 +139,18 @@ function aj_update_user_model($data){
 
 	return $user_model;
 }
+
+function check_facebook_profile_picture($picture){
+
+	if(!is_user_logged_in())
+		return $picture;
+
+	$fb_user_id = get_user_meta( $user_id, 'facebook_uid', true );
+
+	if( $fb_user_id == '')
+		return $picture;
+
+	return $picture;
+
+}
+//add_filter('aj_mock_user_profile_picture', 'check_facebook_profile_picture', 10, 1);

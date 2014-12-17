@@ -35,6 +35,7 @@ if ( is_admin() ) {
 }
 
 //add plugin files
+//
 require_once(plugin_dir_path(__FILE__) . "classes/user/class.usermodel.php");
 require_once(plugin_dir_path(__FILE__) . "classes/user/user.functions.php");
 
