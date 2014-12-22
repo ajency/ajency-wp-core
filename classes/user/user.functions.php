@@ -18,12 +18,46 @@ function get_wp_json_rest_api_vars(){
 }
 
 /**
+ * get capabilities for not logged in role
+ * @return [type] [description]
+ */
+function aj_get_not_logged_in_caps(){
+
+	$not_logged_in_role = get_role('not_logged_in');
+	$capabilities = array($not_logged_in_role->capabilities);
+	return apply_filters('aj_not_logged_in_caps', $capabilities );
+
+}
+
+function aj_generate_key($length) {
+	$random= "";
+	srand((double)microtime()*1000000);
+
+	$data = "AbcDE123IJKLMN67QRSTUVWXYZ";
+	$data .= "aBCdefghijklmn123opq45rs67tuv89wxyz";
+	$data .= "0FGH45OP89";
+
+	for($i = 0; $i < $length; $i++) {
+		$random .= substr($data, (rand()%(strlen($data))), 1);
+	}
+
+	return $random;
+}
+
+
+
+/**
  * Returns the API key for the user
  * @param  [type] $user_id [description]
  * @return [type]          [description]
  */
 function aj_get_user_api_key($user_id){
-	return get_user_meta( $user_id, 'json_api_key' , true);
+	$key = get_user_meta( $user_id, 'json_api_key' , true);
+	if($key === ''){
+		$key = aj_generate_key(15);
+		update_user_meta($user_id, 'json_api_key', $key);
+	}
+	return $key;
 }
 
 /**
@@ -32,7 +66,12 @@ function aj_get_user_api_key($user_id){
  * @return [type]          [description]
  */
 function aj_get_user_shared_secret($user_id){
-	return get_user_meta( $user_id, 'json_shared_secret' , true);
+	$key = get_user_meta( $user_id, 'json_shared_secret' , true);
+	if($key === ''){
+		$key = aj_generate_key(15);
+		update_user_meta($user_id, 'json_shared_secret', $key);
+	}
+	return $key;
 }
 
 /**

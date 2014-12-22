@@ -90,6 +90,8 @@ class AjUserAuthenicationApi{
 
 		$data = $response->get_data();
 
+		//set auth cookies
+		wp_set_auth_cookie( $data->ID );
 		$response->header( 'HTTP_X_API_KEY', aj_get_user_api_key($data->ID));
 		$response->header( 'HTTP_X_SHARED_SECRET', aj_get_user_shared_secret($data->ID));
 

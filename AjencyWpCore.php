@@ -99,7 +99,19 @@ class AjencyWpCore{
 	 * @param    boolean $network_wide    True if WPMU superadmin uses "Network Activate" action, false if WPMU is disabled or plugin is activated on an individual blog.
 	 */
 	public static function activate($network_wide) {
-		// TODO: Define activation functionality here
+		self::create_not_logged_in_role();
+	}
+
+	/**
+	 * [create_not_logged_in_role description]
+	 * @return [type] [description]
+	 */
+	public static function create_not_logged_in_role(){
+
+		$not_logged_in_role = get_role('not_logged_in');
+		if($not_logged_in_role === null)
+			add_role( 'not_logged_in', 'Not Logged In', array() );
+
 	}
 
 	/**
