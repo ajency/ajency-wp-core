@@ -7,14 +7,91 @@
  * sent with every request
  * @return [type] [description]
  */
-function get_wp_json_rest_api_vars(){
+/* TODO: Move this function to proper file */
+function aj_get_global_js_vars(){
 	ob_start(); ?>
+	var userData = <?php echo json_encode(aj_get_user_model(get_current_user_id()));?>;
+	var notLoggedInCaps = <?php echo json_encode(aj_get_not_logged_in_caps()[0]);?>;
+    var allSystemCaps = <?php echo json_encode(aj_get_all_caps()); ?>;
 	var APIURL = '<?php echo esc_url_raw( get_json_url()) ?>';
-	var WP_JSON_API_NONCE = '<?php echo  wp_create_nonce( "wp_json" )  ?>';
-	jQuery.ajaxSetup({headers : { 'X-WP-Nonce': WP_JSON_API_NONCE}});
+	var SITEURL = '<?php echo esc_url_raw( site_url()) ?>';
 	<?php
 	$html = ob_get_clean();
 	return $html;
+}
+
+/**
+ * 
+ */
+function aj_get_facebook_js(){
+	if(!defined('FBAPPID'))
+		wp_die('Please define "FBAPPID" in wp-config.php');
+
+	ob_start(); ?>
+	var FBAPPID  = '<?php echo FBAPPID ?>';
+    if(typeof FBAPPID !== 'undefined')
+        facebookConnectPlugin.browserInit(App, FBAPPID, 'v2.2');
+    <?php
+	$html = ob_get_clean();
+	return $html;
+}
+
+function aj_capNamesCB ( $cap ){
+	$cap = str_replace('_', ' ', $cap);
+	//$cap = ucfirst($cap);
+
+	return $cap;
+}
+
+function aj_get_all_caps(){
+	$max_level = 10;
+	$roles = aj_get_roles(true);
+	$caps = array();
+
+	foreach ( array_keys($roles) as $role ) {
+		$role_caps = get_role($role);
+		// user reported PHP 5.3.3 error without array cast
+		$caps = array_merge( $caps, (array) $role_caps->capabilities );  
+	}
+
+	$keys = array_keys($caps);
+	$names = array_map('aj_capNamesCB', $keys);
+	$capabilities = array_combine($keys, $names);
+	asort($capabilities);
+
+	return array_keys($capabilities);
+}
+
+
+
+/**
+ * Returns all valid roles.
+ * The returned list can be translated or not.
+ *
+ * @uses apply_filters() Calls the 'alkivia_roles_translate' hook on translated roles array.
+ * @since 0.5
+ *
+ * @param boolean $translate If the returned roles have to be translated or not.
+ * @return array All defined roles. If translated, the key is the role name and value is the translated role.
+ */
+function aj_get_roles( $translate = false ) {
+	global $wp_roles;
+	if ( ! isset( $wp_roles ) ) {
+		$wp_roles = new WP_Roles();
+	}
+
+	$roles = $wp_roles->get_names();
+	if ( $translate ) {
+		foreach ($roles as $k => $r) {
+			$roles[$k] = _x($r, 'User role');
+		}
+		asort($roles);
+		return apply_filters('aj_roles_translate', $roles);
+	} else {
+		$roles = array_keys($roles);
+		asort($roles);
+		return $roles;
+	}
 }
 
 /**
