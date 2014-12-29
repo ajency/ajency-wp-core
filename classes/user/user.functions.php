@@ -14,14 +14,14 @@ function aj_get_global_js_vars(){
 	var notLoggedInCaps = <?php echo json_encode(aj_get_not_logged_in_caps()[0]);?>;
     var allSystemCaps = <?php echo json_encode(aj_get_all_caps()); ?>;
 	var APIURL = '<?php echo esc_url_raw( get_json_url()) ?>';
-	var SITEURL = '<?php echo esc_url_raw( site_url()) ?>';
+	var _SITEURL = '<?php echo esc_url_raw( site_url()) ?>';
 	<?php
 	$html = ob_get_clean();
 	return $html;
 }
 
 /**
- * 
+ * TODO: Move this function to proper file
  */
 function aj_get_facebook_js(){
 	if(!defined('FBAPPID'))
